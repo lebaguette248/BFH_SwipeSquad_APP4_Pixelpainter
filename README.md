@@ -1,1 +1,1 @@
-# BFH_SwipeSquad_APP3_Pixelpainter
+# BFH_SwipeSquad_APP4_Pixelpainter
