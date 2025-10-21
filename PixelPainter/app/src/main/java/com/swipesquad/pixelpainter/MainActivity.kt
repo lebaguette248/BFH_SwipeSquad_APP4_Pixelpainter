@@ -26,6 +26,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -96,6 +98,10 @@ fun PixelMalerApp() {
     // Selected color palette, default blue
     var selectedColor by remember { mutableStateOf(Blue) }
 
+    var showDialog by remember { mutableStateOf(false) }
+    var jsonString by remember { mutableStateOf("") }
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -112,7 +118,8 @@ fun PixelMalerApp() {
                         log.put("task", "Pixelmaler")
                         log.put("pixels", json)
 
-                        sendLogbookIntent(context, log.toString())
+                        jsonString = log.toString()
+                        showDialog = true
                     }) {
                         Icon(
                             tint = MaterialTheme.colorScheme.primary,
@@ -154,6 +161,53 @@ fun PixelMalerApp() {
                         Text("Clear")
                     }
                 }
+            }
+        }
+    )
+    if (showDialog) {
+        InputPopup(
+            title = "Is this value correct?",
+            onDismiss = { showDialog = false },
+            onConfirm = { input ->
+                sendLogbookIntent(context, input)
+            },
+            initialText = jsonString
+        )
+    }
+}
+
+@Composable
+fun InputPopup(
+    title: String = "Enter value",
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+    initialText: String
+) {
+    var text by remember { mutableStateOf(initialText) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = title) },
+        text = {
+            TextField(
+                value = text,
+                onValueChange = { text = it },
+                placeholder = { Text("Type something...") }
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(text)
+                    onDismiss()
+                }
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
             }
         }
     )
